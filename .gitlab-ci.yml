@@ -1,0 +1,47 @@
+stages:
+  - test
+  - build
+  - deploy
+
+test:
+  stage: test
+  image: node:12-alpine
+  tags:
+    - docker
+  before_script:
+    - apk add chromium
+    - npm install
+    - export CHROME_BIN=/usr/bin/chromium-browser
+  script:
+    - npm run test:chromeHeadless 
+
+build:
+  stage: build
+  image: node
+  script:
+     - apt update
+     - npm install -g @angular/cli
+     - npm install
+     - npm run build:prod
+     - echo "BUILD SUCCESSFUL"
+  artifacts:
+    paths:
+      - dist/flash-template
+  only:
+    - master
+
+deploy:
+    stage: deploy
+    dependencies:
+     - build
+    before_script: 
+      - mkdir -p ~/.ssh     
+      - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa     
+      - chmod 600 ~/.ssh/id_rsa     
+      - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'        
+    script:
+      - scp -r "$PROJECT_BUILD_PATH"/* root@$DEPLOY_SERVER:"$PROJECT_SERVER_PATH"
+    environment:
+        name: production
+    only:
+      - master

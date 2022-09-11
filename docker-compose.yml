@@ -1,0 +1,16 @@
+# docker-compose
+version: '3.7'
+
+services:
+  projecttemplate:
+    build: .
+    command: sh -c "npm run start"
+    ports:
+      - 4200:4200
+    working_dir: /home/node/projecttemplate
+    volumes:
+      - ./:/home/node/projecttemplate
+      - node_modules:/home/node/projecttemplate/node_modules
+
+volumes:
+  node_modules:

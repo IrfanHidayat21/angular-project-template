@@ -1,0 +1,7 @@
+{
+  "/api/*": {
+    "target": "https://template.api.monev.co",
+    "secure": false,
+    "logLevel": "debug"
+  }
+}
